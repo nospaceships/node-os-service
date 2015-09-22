@@ -1,6 +1,6 @@
 {
   "name": "os-service",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Run Node.JS programs as native Operating System Services.",
   "main": "index.js",
   "directories": {
@@ -14,8 +14,8 @@
     } 
   ],
   "repository": {
-    "type": "mercurial",
-    "url": "https://bitbucket.org/stephenwvickers/node-os-service"
+    "type": "git",
+    "url": "git://github.com/stephenwvickers/node-os-service.git"
   },
   "keywords": [
     "background-process",

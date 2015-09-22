@@ -1,5 +1,5 @@
 
-# os-service - [homepage][homepage]
+# os-service
 
 This module implements the ability to run a [Node.js][nodejs] based JavaScript
 program as a native Windows or Linux service.
@@ -30,7 +30,6 @@ A program can then be added, removed and run as a service:
         service.stop ();
     });
 
-[homepage]: http://re-tool.org "Homepage"
 [nodejs]: http://nodejs.org "Node.js"
 [npm]: https://npmjs.org/ "npm"
 
@@ -319,6 +318,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 ## Version 1.0.2 - 30/03/2015
 
  * Linux start/stop link under `/etc/rcN.d` directories are not removed
+
+## Version 1.0.3 - 22/09/2015
+
+ * Host repository on GitHub
 
 # Roadmap
 
