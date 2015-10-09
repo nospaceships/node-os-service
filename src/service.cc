@@ -2,6 +2,7 @@
 #define SERVICE_CC
 
 #include <node.h>
+#include <nan.h>
 
 #include <io.h>
 #include <signal.h>
@@ -110,64 +111,67 @@ DWORD __stdcall run_thread (LPVOID param) {
 
 namespace service {
 
-void InitAll (Handle<Object> target) {
-	pthread_mutex_init (&status_handle_mtx, NULL);
-	pthread_mutex_init (&stop_requested_mtx, NULL);
-	pthread_mutex_init (&stop_service_mtx, NULL);
+void InitAll (Handle<Object> exports) {
+	pthread_mutex_init(&status_handle_mtx, NULL);
+	pthread_mutex_init(&stop_requested_mtx, NULL);
+	pthread_mutex_init(&stop_service_mtx, NULL);
 	
-	pthread_cond_init (&stop_service, NULL);
+	pthread_cond_init(&stop_service, NULL);
 
-	target->Set (String::NewSymbol ("add"),
-			FunctionTemplate::New (Add)->GetFunction ());
-	target->Set (String::NewSymbol ("isStopRequested"),
-			FunctionTemplate::New (IsStopRequested)->GetFunction ());
-	target->Set (String::NewSymbol ("remove"),
-			FunctionTemplate::New (Remove)->GetFunction ());
-	target->Set (String::NewSymbol ("run"),
-			FunctionTemplate::New (Run)->GetFunction ());
-	target->Set (String::NewSymbol ("stop"),
-			FunctionTemplate::New (Stop)->GetFunction ());
+	exports->Set(Nan::New("add").ToLocalChecked(),
+			Nan::GetFunction(Nan::New<FunctionTemplate>(Add)).ToLocalChecked());
+
+	exports->Set(Nan::New("isStopRequested").ToLocalChecked(),
+			Nan::GetFunction(Nan::New<FunctionTemplate>(IsStopRequested)).ToLocalChecked());
+	
+	exports->Set(Nan::New("remove").ToLocalChecked(),
+			Nan::GetFunction(Nan::New<FunctionTemplate>(Remove)).ToLocalChecked());
+	
+	exports->Set(Nan::New("run").ToLocalChecked(),
+			Nan::GetFunction(Nan::New<FunctionTemplate>(Run)).ToLocalChecked());
+	
+	exports->Set(Nan::New("stop").ToLocalChecked(),
+			Nan::GetFunction(Nan::New<FunctionTemplate>(Stop)).ToLocalChecked());
 }
 
 NODE_MODULE(service, InitAll)
 
-Handle<Value> Add (const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Add) {
+	Nan::HandleScope scope;
 	
-	if (args.Length () < 3) {
-		ThrowException (Exception::Error (String::New (
-				"Two arguments are required")));
-		return scope.Close (args.This ());
+	if (info.Length() < 3) {
+		Nan::ThrowError("Two arguments are required");
+		return;
 	}
 	
-	if (! args[0]->IsString ()) {
-		ThrowException (Exception::TypeError (String::New (
-				"Name argument must be a string")));
-		return scope.Close (args.This ());
+	if (! info[0]->IsString()) {
+		Nan::ThrowTypeError("Name argument must be a string");
+		return;
 	}
-	String::AsciiValue name (args[0]->ToString ());
+	
+	Nan::Utf8String name(info[0]);
 
-	if (! args[1]->IsString ()) {
-		ThrowException (Exception::TypeError (String::New (
-				"Display name argument must be a string")));
-		return scope.Close (args.This ());
+	if (! info[1]->IsString ()) {
+		Nan::ThrowTypeError("Display name argument must be a string");
+		return;
 	}
-	String::AsciiValue display_name (args[1]->ToString ());
+	
+	Nan::Utf8String display_name(info[1]);
 
-	if (! args[2]->IsString ()) {
-		ThrowException (Exception::TypeError (String::New (
-				"Name argument must be a string")));
-		return scope.Close (args.This ());
+	if (! info[2]->IsString ()) {
+		Nan::ThrowTypeError("Name argument must be a string");
+		return;
 	}
-	String::AsciiValue path (args[2]->ToString ());
+	
+	Nan::Utf8String path(info[2]);
 
 	SC_HANDLE scm_handle = OpenSCManager (0, SERVICES_ACTIVE_DATABASE,
 			SC_MANAGER_ALL_ACCESS);
 	if (! scm_handle) {
 		std::string message ("OpenSCManager() failed: ");
 		message += raw_strerror (GetLastError ());
-		ThrowException (Exception::Error (String::New (message.c_str ())));
-		return scope.Close (args.This ());
+		Nan::ThrowError(message.c_str());
+		return;
 	}
 
 	SC_HANDLE svc_handle = CreateService (scm_handle, *name, *display_name,
@@ -178,50 +182,49 @@ Handle<Value> Add (const Arguments& args) {
 		std::string message ("CreateService() failed: ");
 		message += raw_strerror (GetLastError ());
 		CloseServiceHandle (scm_handle);
-		ThrowException (Exception::Error (String::New (message.c_str ())));
-		return scope.Close (args.This ());
+		Nan::ThrowError(message.c_str());
+		return;
 	}
 
 	CloseServiceHandle (svc_handle);
 	CloseServiceHandle (scm_handle);
 
-	return scope.Close (args.This ());
+	info.GetReturnValue().Set(info.This());
 }
 
-Handle<Value> IsStopRequested (const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(IsStopRequested) {
+	Nan::HandleScope scope;
 
 	pthread_mutex_lock (&stop_requested_mtx);
-	Handle<Boolean> requested = Boolean::New (stop_requested);
+	bool requested = stop_requested ? true : false;
 	stop_requested = false;
 	pthread_mutex_unlock (&stop_requested_mtx);
-
-	return scope.Close (requested);
+	
+	info.GetReturnValue().Set(requested);
 }
 
-Handle<Value> Remove (const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Remove) {
+	Nan::HandleScope scope;
 	
-	if (args.Length () < 1) {
-		ThrowException (Exception::Error (String::New (
-				"One argument is required")));
-		return scope.Close (args.This ());
+	if (info.Length () < 1) {
+		Nan::ThrowError("One argument is required");
+		return;
 	}
 	
-	if (! args[0]->IsString ()) {
-		ThrowException (Exception::TypeError (String::New (
-				"Name argument must be a string")));
-		return scope.Close (args.This ());
+	if (! info[0]->IsString ()) {
+		Nan::ThrowTypeError("Name argument must be a string");
+		return;
 	}
-	String::AsciiValue name (args[0]->ToString ());
+	
+	Nan::Utf8String name(info[0]);
 
 	SC_HANDLE scm_handle = OpenSCManager (0, SERVICES_ACTIVE_DATABASE,
 			SC_MANAGER_ALL_ACCESS);
 	if (! scm_handle) {
 		std::string message ("OpenSCManager() failed: ");
 		message += raw_strerror (GetLastError ());
-		ThrowException (Exception::Error (String::New (message.c_str ())));
-		return scope.Close (args.This ());
+		Nan::ThrowError(message.c_str());
+		return;
 	}
 
 	SC_HANDLE svc_handle = OpenService (scm_handle, *name, SERVICE_ALL_ACCESS);
@@ -229,8 +232,8 @@ Handle<Value> Remove (const Arguments& args) {
 		std::string message ("OpenService() failed: ");
 		message += raw_strerror (GetLastError ());
 		CloseServiceHandle (scm_handle);
-		ThrowException (Exception::Error (String::New (message.c_str ())));
-		return scope.Close (args.This ());
+		Nan::ThrowError(message.c_str());
+		return;
 	}
 
 	if (! DeleteService (svc_handle)) {
@@ -238,21 +241,23 @@ Handle<Value> Remove (const Arguments& args) {
 		message += raw_strerror (GetLastError ());
 		CloseServiceHandle (svc_handle);
 		CloseServiceHandle (scm_handle);
-		ThrowException (Exception::Error (String::New (message.c_str ())));
-		return scope.Close (args.This ());
+		Nan::ThrowError(message.c_str());
+		return;
 	}
 
 	CloseServiceHandle (svc_handle);
 	CloseServiceHandle (scm_handle);
 
-	return scope.Close (args.This ());
+	info.GetReturnValue().Set(info.This());
 }
 
-Handle<Value> Run (const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Run) {
+	Nan::HandleScope scope;
 	
-	if (run_initialised)
-		return scope.Close (args.This ());
+	if (run_initialised) {
+		info.GetReturnValue().Set(info.This());
+		return;
+	}
 
 	node_thread_handle = GetCurrentThread ();
 
@@ -260,31 +265,34 @@ Handle<Value> Run (const Arguments& args) {
 	if (! handle) {
 		std::string message ("CreateThread() failed: ");
 		message += raw_strerror (GetLastError ());
-		ThrowException (Exception::Error (String::New (message.c_str ())));
-		return scope.Close (args.This ());
+		Nan::ThrowError(message.c_str());
+		return;
 	} else {
 		CloseHandle (handle);
 	}
 	
 	run_initialised = true;
 
-	return scope.Close (args.This ());
+	info.GetReturnValue().Set(info.This());
 }
 
-Handle<Value> Stop (const Arguments& args) {
-	HandleScope scope;
+NAN_METHOD(Stop) {
+	Nan::HandleScope scope;
 	
-	if (! run_initialised)
-		return scope.Close (args.This ());
+	if (! run_initialised) {
+		info.GetReturnValue().Set(info.This());
+		return;
+	}
 	
 	int rcode = 0;
-	if (args.Length () > 1) {
-		if (! args[0]->IsUint32 ()) {
-			ThrowException (Exception::TypeError (String::New (
-					"Name argument must be a string")));
-			return scope.Close (args.This ());
+	
+	if (info.Length () > 1) {
+		if (! info[0]->IsUint32 ()) {
+			Nan::ThrowTypeError("Name argument must be a string");
+			return;
 		}
-		rcode = args[0]->ToUint32 ()->Value ();
+		
+		rcode = info[0]->ToUint32()->Value();
 	}
 	
 	set_status (SERVICE_STOP_PENDING, NO_ERROR, 0);
@@ -293,7 +301,7 @@ Handle<Value> Stop (const Arguments& args) {
 	
 	set_status (SERVICE_STOPPED, NO_ERROR, rcode);
 
-	return scope.Close (args.This ());
+	info.GetReturnValue().Set(info.This());
 }
 
 }; /* namespace service */

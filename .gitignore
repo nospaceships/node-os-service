@@ -1,3 +1,4 @@
 syntax: glob
 build
 example/*.log
+node_modules/

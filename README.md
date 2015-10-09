@@ -199,6 +199,9 @@ The `name` parameter specifies the name of the created service.  The optional
    of `process.argv[1]`
  * `programArgs` - An array of strings specifying parameters to pass to
    `programPath`, defaults to `[]`
+ * `runLevels` - An array of numbers specifying Linux run-levels at which
+   the service should be started for Linux platforms, defaults to
+   `[2, 3, 4, 5]`
 
 The service will be set to automatically start at boot time, but not started.
 The service can be started using the `net start "my-service"` command on
@@ -322,6 +325,13 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 ## Version 1.0.3 - 22/09/2015
 
  * Host repository on GitHub
+
+## Version 1.1.0 - 09/10/2015
+
+ * Migrate C++ addon code to use the Native Abstractions for Node framework
+ * Add missing shebang line '#!' to start/stop script template
+ * Not possible to specify run levels for Linux start/stop script (added new
+   `runLevels` item to the `options` parameter to the `add()` function
 
 # Roadmap
 

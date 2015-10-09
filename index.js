@@ -8,17 +8,19 @@ var serviceWrap;
 var runInitialised = false;
 
 var linuxStartStopScript = [
+	'#!/bin/bash',
+	'',
 	'### BEGIN INIT INFO',
 	'# Provides:          ##NAME##',
 	'# Required-Start:    ',
 	'# Required-Stop:     ',
-	'# Default-Start:     2 3 4 5',
+	'# Default-Start:     ##RUN_LEVELS_ARR##',
 	'# Default-Stop:      0 1 6',
 	'# Short-Description: Start ##NAME## at boot time',
 	'# Description:       Enable ##NAME## service.',
 	'### END INIT INFO',
 	'',
-	'# chkconfig:   2345 99 1',
+	'# chkconfig:   ##RUN_LEVELS_STR## 99 1',
 	'# description: ##NAME##',
 	'',
 	'set_pid () {',
@@ -197,6 +199,10 @@ function add (name, options, cb) {
 		if (options && options.programArgs)
 			for (var i = 0; i < options.programArgs.length; i++)
 				programArgs.push ("\"" + options.programArgs[i] + "\"");
+		
+		var runLevels = [2, 3, 4, 5];
+		if (options && options.runLevels)
+			runLevels = options.runLevels;
 
 		var nodeArgsStr = nodeArgs.join(" ");
 		var programArgsStr = programArgs.join(" ");
@@ -211,6 +217,8 @@ function add (name, options, cb) {
 			line = line.replace("##NODE_ARGS##", nodeArgsStr);
 			line = line.replace("##PROGRAM_PATH##", programPath);
 			line = line.replace("##PROGRAM_ARGS##", programArgsStr);
+			line = line.replace("##RUN_LEVELS_ARR##", runLevels.join(" "));
+			line = line.replace("##RUN_LEVELS_STR##", runLevels.join(""));
 			
 			startStopScript.push(line);
 		}

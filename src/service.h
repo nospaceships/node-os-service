@@ -17,18 +17,19 @@
 #endif
 
 #include <node.h>
+#include <nan.h>
 
 using namespace v8;
 
 namespace service {
 
-static void Init (Handle<Object> target);
+static void Init(Handle<Object> exports);
 
-static Handle<Value> Add (const Arguments& args);
-static Handle<Value> IsStopRequested (const Arguments& args);
-static Handle<Value> Remove (const Arguments& args);
-static Handle<Value> Run (const Arguments& args);
-static Handle<Value> Stop (const Arguments& args);
+static NAN_METHOD(Add);
+static NAN_METHOD(IsStopRequested);
+static NAN_METHOD(Remove);
+static NAN_METHOD(Run);
+static NAN_METHOD(Stop);
 
 }; /* namespace service */
 
