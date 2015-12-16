@@ -55,7 +55,7 @@ with a `--add` parameter, and removes the created service when called with a
         service.remove ("my-service", function(error){ 
            if (error)
               console.trace(error);
-        }););
+        });
     } else if (process.argv[2] == "--run") {
         var logStream = fs.createWriteStream (process.argv[1] + ".log");
         
