@@ -333,6 +333,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Not possible to specify run levels for Linux start/stop script (added new
    `runLevels` item to the `options` parameter to the `add()` function
 
+## Version 1.1.1 - 08/02/2016
+
+ * Remove extraneous semicolon from the README.md file
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
