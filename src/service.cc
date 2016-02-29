@@ -165,6 +165,23 @@ NAN_METHOD(Add) {
 	
 	Nan::Utf8String path(info[2]);
 
+	std::string username;
+	std::string password;
+
+	if (info.Length() > 3) {
+		if (info[3]->IsString ()) {
+			Nan::Utf8String tmp_username(info[3]);
+			username = *tmp_username;
+		}
+	
+		if (info.Length() > 4) {
+			if (info[4]->IsString ()) {
+				Nan::Utf8String tmp_password(info[4]);
+				password = *tmp_password;
+			}
+		}
+	}
+
 	SC_HANDLE scm_handle = OpenSCManager (0, SERVICES_ACTIVE_DATABASE,
 			SC_MANAGER_ALL_ACCESS);
 	if (! scm_handle) {
@@ -174,9 +191,12 @@ NAN_METHOD(Add) {
 		return;
 	}
 
+	const char* pusername = username.length() ? username.c_str() : NULL;
+	const char* ppassword = password.length() ? password.c_str() : NULL;
+
 	SC_HANDLE svc_handle = CreateService (scm_handle, *name, *display_name,
 			SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS, SERVICE_AUTO_START,
-			SERVICE_ERROR_NORMAL, *path, 0, 0, 0, 0, 0);
+			SERVICE_ERROR_NORMAL, *path, 0, 0, 0, pusername, ppassword);
 
 	if (! svc_handle) {
 		std::string message ("CreateService() failed: ");

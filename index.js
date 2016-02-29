@@ -159,6 +159,9 @@ function add (name, options, cb) {
 			? options.programPath
 			: process.argv[1];
 
+	var username = options ? (options.username || null) : null;
+	var password = options ? (options.password || null) : null;
+
 	if (os.platform() == "win32") {
 		var displayName = (options && options.displayName)
 				? options.displayName
@@ -184,7 +187,8 @@ function add (name, options, cb) {
 		var servicePath = serviceArgs.join (" ");
 
 		try {
-			getServiceWrap ().add (name, displayName, servicePath);
+			getServiceWrap ().add (name, displayName, servicePath, username,
+					password);
 			cb();
 		} catch (error) {
 			cb(error);

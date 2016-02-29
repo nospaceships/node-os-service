@@ -8,14 +8,24 @@ var fs = require ("fs");
 var service = require ("../");
 
 function usage () {
-	console.log ("usage: node periodic-logger --add <name>");
+	console.log ("usage: node periodic-logger --add <name> [username] [password]");
 	console.log ("       node periodic-logger --remove <name>");
 	console.log ("       node periodic-logger --run");
 	process.exit (-1);
 }
 
 if (process.argv[2] == "--add" && process.argv.length >= 4) {
-	service.add (process.argv[3], {programArgs: ["--run", "me"]}, function(error) {
+	var options = {
+		programArgs: ["--run", "me"]
+	};
+
+	if (process.argv.length > 4)
+		options.username = process.argv[4];
+
+	if (process.argv.length > 5)
+		options.password = process.argv[5];
+
+	service.add (process.argv[3], options, function(error) {
 		if (error)
 			console.log(error.toString());
 	});
@@ -33,7 +43,7 @@ if (process.argv[2] == "--add" && process.argv.length >= 4) {
 	// Here is our long running code, simply print a date/time string to
 	// our log file
 	setInterval (function () {
-		console.error (new Date ().toString ());
+		console.log(new Date ().toString ());
 	}, 1000);
 } else {
 	usage ();
