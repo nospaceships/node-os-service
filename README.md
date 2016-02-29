@@ -202,6 +202,14 @@ The `name` parameter specifies the name of the created service.  The optional
  * `runLevels` - An array of numbers specifying Linux run-levels at which
    the service should be started for Linux platforms, defaults to
    `[2, 3, 4, 5]`
+ * `username` - For Windows platforms a username and password can be specified,
+   the service will be run using these credentials when started, see the
+   `CreatedService()` functions [win32 API documentation][createdservice] for
+   details on the format of the username, on all other platforms this parameter
+   is ignored
+ * `password` - See the `username` parameter
+
+[createdservice]: https://msdn.microsoft.com/en-us/library/windows/desktop/ms682450(v=vs.85).aspx "CreatedService()"
 
 The service will be set to automatically start at boot time, but not started.
 The service can be started using the `net start "my-service"` command on
@@ -218,7 +226,9 @@ the program:
 
     var options = {
         displayName: "MyService",
-        programArgs: ["--server-port", 8888]
+        programArgs: ["--server-port", 8888],
+        username: ".\Stephen Vickers",
+        password: "MyPassword :)"
     };
     
     service.add ("my-service", options, function(error) {
@@ -336,6 +346,12 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 ## Version 1.1.1 - 08/02/2016
 
  * Remove extraneous semicolon from the README.md file
+
+## Version 1.2.0 - 29/02/2016
+
+ * On Windows platforms allow users to specify a username/password with which
+   a service should be run, the `username` and `password` options parameters
+   were added to the `add()` function
 
 # Roadmap
 
