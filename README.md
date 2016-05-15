@@ -353,6 +353,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    a service should be run, the `username` and `password` options parameters
    were added to the `add()` function
 
+## Version 1.3.0 - 15/05/2016
+
+ * Require nan 2.3.x to support node version 6
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
