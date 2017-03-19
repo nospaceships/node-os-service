@@ -178,8 +178,9 @@ platforms - at least the API is exactly the same for both platforms both from
 a service management and service running perspective.
 
 On Windows platforms the Windows Service Control Manager WIN32 API is used to
-manage services.  On Linux platforms the `chkconfig` command is used, and if
-not available, the `update-rc.d` command is used instead.
+manage services.  On Linux platforms a `systemd` unit is created if it is
+available, otherwise the `chkconfig` command is used.  If `chkconfig` is not
+available the `update-rc.d` command is tried instead.
 
 ## service.add (name, [options], cb)
 
@@ -201,7 +202,8 @@ The `name` parameter specifies the name of the created service.  The optional
    `programPath`, defaults to `[]`
  * `runLevels` - An array of numbers specifying Linux run-levels at which
    the service should be started for Linux platforms, defaults to
-   `[2, 3, 4, 5]`
+   `[2, 3, 4, 5]`, this is only used when `chkconfig` or `update-rc.d` is used
+	to install a service
  * `username` - For Windows platforms a username and password can be specified,
    the service will be run using these credentials when started, see the
    `CreatedService()` functions [win32 API documentation][createdservice] for
@@ -356,6 +358,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 ## Version 1.3.0 - 15/05/2016
 
  * Require nan 2.3.x to support node version 6
+
+## Version 1.4.0 - 20/03/2017
+
+ * Support Linux systemd
 
 # Roadmap
 

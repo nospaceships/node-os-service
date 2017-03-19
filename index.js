@@ -139,10 +139,47 @@ var linuxStartStopScript = [
 	'esac'
 ];
 
+var linuxSystemUnit = [
+	'[Unit]',
+	'Description=##NAME##',
+	'After=network.target',
+	'',
+	'[Service]',
+	'Type=simple',
+	'StandardOutput=null',
+	'StandardError=null',
+	'UMask=0007',
+	'ExecStart=##NODE_PATH## ##NODE_ARGS## ##PROGRAM_PATH## ##PROGRAM_ARGS##',
+	'',
+	'[Install]'
+];
+
 function getServiceWrap () {
 	if (! serviceWrap)
 		serviceWrap = require ("./build/Release/service");
 	return serviceWrap;
+}
+
+function runProcess(path, args, cb) {
+	var child = child_process.spawn(path, args);
+
+	child.on("exit", function(code) {
+		if (code != 0) {
+			var error = new Error(path + " failed: " + code)
+			error.code = code
+			cb(error);
+		} else {
+			cb();
+		}
+	});
+
+	child.on("error", function(error) {
+		if (error) {
+			cb(error);
+		} else {
+			cb();
+		}
+	});
 }
 
 function add (name, options, cb) {
@@ -211,66 +248,91 @@ function add (name, options, cb) {
 		var nodeArgsStr = nodeArgs.join(" ");
 		var programArgsStr = programArgs.join(" ");
 
-		var startStopScript = [];
-
-		for (var i = 0; i < linuxStartStopScript.length; i++) {
-			var line = linuxStartStopScript[i];
-			
-			line = line.replace("##NAME##", name);
-			line = line.replace("##NODE_PATH##", nodePath);
-			line = line.replace("##NODE_ARGS##", nodeArgsStr);
-			line = line.replace("##PROGRAM_PATH##", programPath);
-			line = line.replace("##PROGRAM_ARGS##", programArgsStr);
-			line = line.replace("##RUN_LEVELS_ARR##", runLevels.join(" "));
-			line = line.replace("##RUN_LEVELS_STR##", runLevels.join(""));
-			
-			startStopScript.push(line);
-		}
-		
-		var startStopScriptStr = startStopScript.join("\n");
-		
-		var ctlPath = "/etc/init.d/" + name;
+		var initPath = "/etc/init.d/" + name;
+		var systemPath = "/usr/lib/systemd/system/" + name + ".service";
 		var ctlOptions = {
 			mode: 493 // rwxr-xr-x
 		};
-		
-		fs.writeFile(ctlPath, startStopScriptStr, ctlOptions, function(error) {
+
+		fs.stat("/usr/lib/systemd/system1", function(error, stats) {
 			if (error) {
-				cb(error);
+				if (error.code == "ENOENT") {
+					var startStopScript = [];
+
+					for (var i = 0; i < linuxStartStopScript.length; i++) {
+						var line = linuxStartStopScript[i];
+						
+						line = line.replace("##NAME##", name);
+						line = line.replace("##NODE_PATH##", nodePath);
+						line = line.replace("##NODE_ARGS##", nodeArgsStr);
+						line = line.replace("##PROGRAM_PATH##", programPath);
+						line = line.replace("##PROGRAM_ARGS##", programArgsStr);
+						line = line.replace("##RUN_LEVELS_ARR##", runLevels.join(" "));
+						line = line.replace("##RUN_LEVELS_STR##", runLevels.join(""));
+						
+						startStopScript.push(line);
+					}
+					
+					var startStopScriptStr = startStopScript.join("\n");
+
+					fs.writeFile(initPath, startStopScriptStr, ctlOptions, function(error) {
+						if (error) {
+							cb(new Error("writeFile(" + initPath + ") failed: " + error.message));
+						} else {
+							runProcess("chkconfig", ["--add", name], function(error) {
+								if (error) {
+									if (error.code == "ENOENT") {
+										runProcess("update-rc.d", [name, "defaults"], function(error) {
+											if (error) {
+												cb(new Error("update-rd.d failed: " + error.message));
+											} else {
+												cb()
+											}
+										})
+									} else {
+										cb(new Error("chkconfig failed: " + error.message));
+									}
+								} else {
+									cb()
+								}
+							})
+						}
+					})
+				} else {
+					cb(new Error("stat(/usr/lib/systemd/system) failed: " + error.message));
+				}
 			} else {
-				// Try chkconfig first, then update-rc.d
-				var child = child_process.spawn("chkconfig", ["--add", name]);
-		
-				child.on("exit", function(code) {
-					if (code != 0) {
-						cb(new Error("chkconfig failed: " + code));
-					} else {
-						cb();
-					}
-				});
+				var systemUnit = [];
+
+				for (var i = 0; i < linuxSystemUnit.length; i++) {
+					var line = linuxSystemUnit[i];
+					
+					line = line.replace("##NAME##", name);
+					line = line.replace("##NODE_PATH##", nodePath);
+					line = line.replace("##NODE_ARGS##", nodeArgsStr);
+					line = line.replace("##PROGRAM_PATH##", programPath);
+					line = line.replace("##PROGRAM_ARGS##", programArgsStr);
+					
+					systemUnit.push(line);
+				}
 				
-				child.on("error", function(error) {
-					if (error.errno == "ENOENT") {
-						var child = child_process.spawn("update-rc.d",
-								[name, "defaults"]);
-		
-						child.on("exit", function(code) {
-							if (code != 0) {
-								cb(new Error("update-rc.d failed: " + code));
+				var systemUnitStr = systemUnit.join("\n");
+
+				fs.writeFile(systemPath, systemUnitStr, ctlOptions, function(error) {
+					if (error) {
+						cb(new Error("writeFile(" + systemPath + ") failed: " + error.message));
+					} else {
+						runProcess("systemctl", ["enable", name], function(error) {
+							if (error) {
+								cb(new Error("systemctl failed: " + error.message));
 							} else {
-								cb();
+								cb()
 							}
-						});
-				
-						child.on("error", function(error) {
-							cb(new Error("chkconfig failed: " + error.errno));
-						});
-					} else {
-						cb(error);
+						})
 					}
-				});
+				})
 			}
-		});
+		})
 	}
 	
 	return this;
@@ -289,49 +351,62 @@ function remove (name, cb) {
 			cb(error);
 		}
 	} else {
-		function removeCtlPath(cb) {
-			var ctlPath = "/etc/init.d/" + name;
+		var initPath = "/etc/init.d/" + name;
+		var systemPath = "/usr/lib/systemd/system/" + name + ".service";
 
-			fs.unlink(ctlPath, cb);
-		};
-	
-		// Try chkconfig first, then update-rc.d. update-rc.d seems to want us to
-		// remove our /etc/init.d file first.
-		var child = child_process.spawn("chkconfig", ["--del", name]);
-
-		child.on("exit", function(code) {
-			if (code != 0) {
-				cb(new Error("chkconfig failed: " + code));
-			} else {
-				removeCtlPath(cb);
-			}
-		});
-
-		child.on("error", function(error) {
-			if (error.errno == "ENOENT") {
-				removeCtlPath(function(error) {
-					if (error) {
-						cb(error);
-					} else {
-						var child = child_process.spawn("update-rc.d", [name, "remove"]);
-
-						child.on("exit", function(code) {
-							if (code != 0) {
-								cb(new Error("update-rc.d failed: " + code));
+		function removeCtlPaths() {
+			fs.unlink(initPath, function(error) {
+				if (error) {
+					if (error.code == "ENOENT") {
+						fs.unlink(systemPath, function(error) {
+							if (error) {
+								cb(new Error("unlink(" + systemPath + ") failed: " + error.message))
 							} else {
-								cb();
+								cb()
 							}
 						});
-
-						child.on("error", function(error) {
-							cb(new Error("chkconfig failed: " + error.errno));
-						});
+					} else {
+						cb(new Error("unlink(" + initPath + ") failed: " + error.message))
 					}
-				});
+				} else {
+					cb()
+				}
+			});
+		};
+
+		fs.stat("/usr/lib/systemd/system1", function(error, stats) {
+			if (error) {
+				if (error.code == "ENOENT") {
+					runProcess("chkconfig", ["--del", name], function(error) {
+						if (error) {
+							if (error.code == "ENOENT") {
+								runProcess("update-rc.d", [name, "remove"], function(error) {
+									if (error) {
+										cb(new Error("update-rc.d failed: " + error.message));
+									} else {
+										removeCtlPaths()
+									}
+								});
+							} else {
+								cb(new Error("chkconfig failed: " + error.message));
+							}
+						} else {
+							removeCtlPaths()
+						}
+					})
+				} else {
+					cb(new Error("stat(/usr/lib/systemd/system) failed: " + error.message));
+				}
 			} else {
-				cb(error);
+				runProcess("systemctl", ["disable", name], function(error) {
+					if (error) {
+						cb(new Error("systemctl failed: " + error.message));
+					} else {
+						removeCtlPaths()
+					}
+				})
 			}
-		});
+		})
 	}
 }
 
