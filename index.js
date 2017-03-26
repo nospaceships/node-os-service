@@ -254,7 +254,7 @@ function add (name, options, cb) {
 			mode: 493 // rwxr-xr-x
 		};
 
-		fs.stat("/usr/lib/systemd/system1", function(error, stats) {
+		fs.stat("/usr/lib/systemd/system", function(error, stats) {
 			if (error) {
 				if (error.code == "ENOENT") {
 					var startStopScript = [];
@@ -374,7 +374,7 @@ function remove (name, cb) {
 			});
 		};
 
-		fs.stat("/usr/lib/systemd/system1", function(error, stats) {
+		fs.stat("/usr/lib/systemd/system", function(error, stats) {
 			if (error) {
 				if (error.code == "ENOENT") {
 					runProcess("chkconfig", ["--del", name], function(error) {
