@@ -363,6 +363,11 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Support Linux systemd
 
+## Version 1.4.1 - 27/03/2017
+
+ * The systemd install doesn't work because of typo in directory name in
+   index.js
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
