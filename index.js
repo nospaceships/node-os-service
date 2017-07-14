@@ -23,6 +23,8 @@ var linuxStartStopScript = [
 	'# chkconfig:   ##RUN_LEVELS_STR## 99 1',
 	'# description: ##NAME##',
 	'',
+	'umask 0007',
+	'',
 	'set_pid () {',
 	'	unset PID',
 	'	_PID=`head -1 "##PROGRAM_PATH##.pid" 2>/dev/null`',
