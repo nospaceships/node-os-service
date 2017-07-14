@@ -153,8 +153,8 @@ var linuxSystemUnit = [
 	'UMask=0007',
 	'ExecStart=##NODE_PATH## ##NODE_ARGS## ##PROGRAM_PATH## ##PROGRAM_ARGS##',
 	'',
-	'[Install]'
-	'WantedBy=multi-user.target',
+	'[Install]',
+	'WantedBy=##SYSTEMD_TARGET##'
 ];
 
 function getServiceWrap () {
@@ -307,6 +307,10 @@ function add (name, options, cb) {
 			} else {
 				var systemUnit = [];
 
+				var systemdTarget = "multi-user.target"
+				if (options && options.systemdTarget)
+					systemdTarget = options.systemdTarget
+
 				for (var i = 0; i < linuxSystemUnit.length; i++) {
 					var line = linuxSystemUnit[i];
 					
@@ -315,6 +319,7 @@ function add (name, options, cb) {
 					line = line.replace("##NODE_ARGS##", nodeArgsStr);
 					line = line.replace("##PROGRAM_PATH##", programPath);
 					line = line.replace("##PROGRAM_ARGS##", programArgsStr);
+					line = line.replace("##SYSTEMD_TARGET##", systemdTarget);
 					
 					systemUnit.push(line);
 				}
