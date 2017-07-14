@@ -154,6 +154,7 @@ var linuxSystemUnit = [
 	'ExecStart=##NODE_PATH## ##NODE_ARGS## ##PROGRAM_PATH## ##PROGRAM_ARGS##',
 	'',
 	'[Install]'
+	'WantedBy=multi-user.target',
 ];
 
 function getServiceWrap () {
