@@ -154,7 +154,7 @@ var linuxSystemUnit = [
 	'ExecStart=##NODE_PATH## ##NODE_ARGS## ##PROGRAM_PATH## ##PROGRAM_ARGS##',
 	'',
 	'[Install]',
-	'WantedBy=##SYSTEMD_TARGET##'
+	'WantedBy=##SYSTEMD_WANTED_BY##'
 ];
 
 function getServiceWrap () {
@@ -256,7 +256,7 @@ function add (name, options, cb) {
 		var ctlOptions = {
 			mode: 493 // rwxr-xr-x
 		};
-
+				
 		fs.stat("/usr/lib/systemd/system", function(error, stats) {
 			if (error) {
 				if (error.code == "ENOENT") {
@@ -307,9 +307,9 @@ function add (name, options, cb) {
 			} else {
 				var systemUnit = [];
 
-				var systemdTarget = "multi-user.target"
-				if (options && options.systemdTarget)
-					systemdTarget = options.systemdTarget
+				var systemdWantedBy = "multi-user.target"
+				if (options && options.systemdWantedBy)
+					systemdWantedBy = options.systemdWantedBy
 
 				for (var i = 0; i < linuxSystemUnit.length; i++) {
 					var line = linuxSystemUnit[i];
@@ -319,7 +319,7 @@ function add (name, options, cb) {
 					line = line.replace("##NODE_ARGS##", nodeArgsStr);
 					line = line.replace("##PROGRAM_PATH##", programPath);
 					line = line.replace("##PROGRAM_ARGS##", programArgsStr);
-					line = line.replace("##SYSTEMD_TARGET##", systemdTarget);
+					line = line.replace("##SYSTEMD_WANTED_BY##", systemdWantedBy);
 					
 					systemUnit.push(line);
 				}
@@ -360,7 +360,8 @@ function remove (name, cb) {
 		}
 	} else {
 		var initPath = "/etc/init.d/" + name;
-		var systemPath = "/usr/lib/systemd/system/" + name + ".service";
+		var systemDir = "/etc/systemd/system"
+		var systemPath = systemDir + "/" + name + ".service";
 
 		function removeCtlPaths() {
 			fs.unlink(initPath, function(error) {
@@ -382,7 +383,7 @@ function remove (name, cb) {
 			});
 		};
 
-		fs.stat("/usr/lib/systemd/system", function(error, stats) {
+		fs.stat(systemDir, function(error, stats) {
 			if (error) {
 				if (error.code == "ENOENT") {
 					runProcess("chkconfig", ["--del", name], function(error) {
@@ -403,7 +404,7 @@ function remove (name, cb) {
 						}
 					})
 				} else {
-					cb(new Error("stat(/usr/lib/systemd/system) failed: " + error.message));
+					cb(new Error("stat(" + systemDir + ") failed: " + error.message));
 				}
 			} else {
 				runProcess("systemctl", ["disable", name], function(error) {

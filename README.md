@@ -210,7 +210,7 @@ The `name` parameter specifies the name of the created service.  The optional
    details on the format of the username, on all other platforms this parameter
    is ignored
  * `password` - See the `username` parameter
- * `systemdTarget` - For when systemd will be used a target can be specified
+ * `systemdWantedBy` - For when systemd will be used a target can be specified
    for the `WantedBy` attribute under the `[Install]` section in the generated
    systemd unit file, defaults to `multi-user.target`
 
