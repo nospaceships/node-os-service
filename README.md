@@ -371,6 +371,12 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * The systemd install doesn't work because of typo in directory name in
    index.js
 
+## Version 1.4.2 - 14/07/2017
+
+ * Service not automatically started on boot when under the systemd service
+   (added `WantedBy` attribute to generated systemd unit)
+ * Umask not set in system 5 init script
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
