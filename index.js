@@ -12,7 +12,7 @@ var linuxStartStopScript = [
 	'',
 	'### BEGIN INIT INFO',
 	'# Provides:          ##NAME##',
-	'# Required-Start:    ',
+	'# Required-Start:    ##DEPENDENCIES##',
 	'# Required-Stop:     ',
 	'# Default-Start:     ##RUN_LEVELS_ARR##',
 	'# Default-Stop:      0 1 6',
@@ -145,6 +145,7 @@ var linuxSystemUnit = [
 	'[Unit]',
 	'Description=##NAME##',
 	'After=network.target',
+	'Requires=##DEPENDENCIES##',
 	'',
 	'[Service]',
 	'Type=simple',
@@ -255,6 +256,10 @@ function add (name, options, cb) {
 		var nodeArgsStr = nodeArgs.join(" ");
 		var programArgsStr = programArgs.join(" ");
 
+		var deps = (options && options.dependencies)
+				? options.dependencies.join(" ")
+				: ""
+
 		var initPath = "/etc/init.d/" + name;
 		var systemPath = "/usr/lib/systemd/system/" + name + ".service";
 		var ctlOptions = {
@@ -276,6 +281,7 @@ function add (name, options, cb) {
 						line = line.replace("##PROGRAM_ARGS##", programArgsStr);
 						line = line.replace("##RUN_LEVELS_ARR##", runLevels.join(" "));
 						line = line.replace("##RUN_LEVELS_STR##", runLevels.join(""));
+						line = line.replace("##DEPENDENCIES##", deps);
 						
 						startStopScript.push(line);
 					}
@@ -324,6 +330,7 @@ function add (name, options, cb) {
 					line = line.replace("##PROGRAM_PATH##", programPath);
 					line = line.replace("##PROGRAM_ARGS##", programArgsStr);
 					line = line.replace("##SYSTEMD_WANTED_BY##", systemdWantedBy);
+					line = line.replace("##DEPENDENCIES##", deps);
 					
 					systemUnit.push(line);
 				}
@@ -364,7 +371,7 @@ function remove (name, cb) {
 		}
 	} else {
 		var initPath = "/etc/init.d/" + name;
-		var systemDir = "/etc/systemd/system"
+		var systemDir = "/usr/lib/systemd/system"
 		var systemPath = systemDir + "/" + name + ".service";
 
 		function removeCtlPaths() {
