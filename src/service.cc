@@ -312,9 +312,9 @@ NAN_METHOD(Stop) {
 			return;
 		}
 		
-		rcode = info[0]->ToUint32()->Value();
+		rcode = Nan::To<Uint32>(info[0]).ToLocalChecked()->Value();
 	}
-	
+
 	set_status (SERVICE_STOP_PENDING, NO_ERROR, 0);
 	
 	pthread_cond_signal (&stop_service);
