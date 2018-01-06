@@ -226,9 +226,13 @@ function add (name, options, cb) {
 	
 		var servicePath = serviceArgs.join (" ");
 
+		deps = options.dependencies
+				? options.dependencies.join("\0") + "\0\0"
+				: ""
+
 		try {
 			getServiceWrap ().add (name, displayName, servicePath, username,
-					password);
+					password, deps);
 			cb();
 		} catch (error) {
 			cb(error);
