@@ -206,15 +206,17 @@ The `name` parameter specifies the name of the created service.  The optional
 	to install a service
  * `username` - For Windows platforms a username and password can be specified,
    the service will be run using these credentials when started, see the
-   `CreatedService()` functions [win32 API documentation][createdservice] for
+   `CreateService()` functions [win32 API documentation][createservice] for
    details on the format of the username, on all other platforms this parameter
    is ignored
  * `password` - See the `username` parameter
  * `systemdWantedBy` - For when systemd will be used a target can be specified
    for the `WantedBy` attribute under the `[Install]` section in the generated
    systemd unit file, defaults to `multi-user.target`
+ * `dependencies` - AN array of strings specifying other services this service
+   depends on, this is optional
 
-[createdservice]: https://msdn.microsoft.com/en-us/library/windows/desktop/ms682450(v=vs.85).aspx "CreatedService()"
+[createservice]: https://msdn.microsoft.com/en-us/library/windows/desktop/ms682450(v=vs.85).aspx "CreateService()"
 
 The service will be set to automatically start at boot time, but not started.
 The service can be started using the `net start "my-service"` command on
@@ -376,6 +378,13 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Service not automatically started on boot when under the systemd service
    (added `WantedBy` attribute to generated systemd unit)
  * Umask not set in system 5 init script
+
+## Version 1.5.0 - 06/01/2018
+
+ * Address warnings for 'v8::Value::ToUint32 was declared deprecated'
+ * Override the stdout/stderr handles instead of using the deprecated
+   `__defineGetter__()` function
+ * Specify dependancies when adding a service
 
 # Roadmap
 
