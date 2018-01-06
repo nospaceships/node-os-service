@@ -437,13 +437,8 @@ function run (stdoutLogStream, stderrLogStream, stopCallback) {
 	}
 
 	if (! runInitialised) {
-		process.__defineGetter__('stdout', function() {
-			return stdoutLogStream;
-		});
-		
-		process.__defineGetter__('stderr', function() {
-			return stderrLogStream;
-		});
+		process.stdout.write = stdoutLogStream.write.bind(stdoutLogStream);
+		process.stderr.write = stderrLogStream.write.bind(stderrLogStream);
 		
 		if (os.platform() == "win32") {
 			setInterval (function () {
