@@ -381,6 +381,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    their required/own logging modules) - the run() function now only accepts
    one argument whereas previously this was either two or three
 
+# Version 2.1.0 - 02/05/2018
+
+ * Support Node.js 10
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
