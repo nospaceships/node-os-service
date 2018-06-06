@@ -385,7 +385,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Support Node.js 10
 
-## Version 2.1.1 - 06/06/2018
+## Version 2.1.2 - 06/06/2018
 
  * Set NoSpaceships Ltd to be the owner and maintainer
 

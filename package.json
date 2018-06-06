@@ -1,6 +1,6 @@
 {
   "name": "os-service",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Run Node.JS programs as native Operating System Services.",
   "main": "index.js",
   "directories": {
