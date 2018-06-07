@@ -308,12 +308,6 @@ The following example stops the calling program specifying a return code of
 
 Example programs are included under the modules `example` directory.
 
-# Bugs & Known Issues
-
-None, yet!
-
-Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
-
 # Changes
 
 ## Version 1.0.0 - 30/12/2014
@@ -389,9 +383,9 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Set NoSpaceships Ltd to be the owner and maintainer
 
-# Roadmap
+## Version 2.1.3 - 07/06/2018
 
-Suggestions and requirements should be sent to <hello@nospaceships.com>.
+ * Remove redundant sections from README.md
 
 # License
 
