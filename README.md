@@ -387,6 +387,10 @@ Example programs are included under the modules `example` directory.
 
  * Remove redundant sections from README.md
 
+## Version 2.2.0 - 02/01/2020
+
+ * Support Node.js 12.x
+
 # License
 
 Copyright (c) 2018 NoSpaceships Ltd <hello@nospaceships.com>
