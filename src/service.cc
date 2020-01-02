@@ -111,27 +111,18 @@ DWORD __stdcall run_thread (LPVOID param) {
 
 namespace service {
 
-void InitAll (Handle<Object> exports) {
+void InitAll (Local<Object> exports) {
 	pthread_mutex_init(&status_handle_mtx, NULL);
 	pthread_mutex_init(&stop_requested_mtx, NULL);
 	pthread_mutex_init(&stop_service_mtx, NULL);
 	
 	pthread_cond_init(&stop_service, NULL);
 
-	exports->Set(Nan::New("add").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(Add)).ToLocalChecked());
-
-	exports->Set(Nan::New("isStopRequested").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(IsStopRequested)).ToLocalChecked());
-	
-	exports->Set(Nan::New("remove").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(Remove)).ToLocalChecked());
-	
-	exports->Set(Nan::New("run").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(Run)).ToLocalChecked());
-	
-	exports->Set(Nan::New("stop").ToLocalChecked(),
-			Nan::GetFunction(Nan::New<FunctionTemplate>(Stop)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("add").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Add)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("isStopRequested").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(IsStopRequested)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("remove").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Remove)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("run").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Run)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("stop").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Stop)).ToLocalChecked());
 }
 
 NODE_MODULE(service, InitAll)

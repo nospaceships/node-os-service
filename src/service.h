@@ -23,8 +23,6 @@ using namespace v8;
 
 namespace service {
 
-static void Init(Handle<Object> exports);
-
 static NAN_METHOD(Add);
 static NAN_METHOD(IsStopRequested);
 static NAN_METHOD(Remove);
