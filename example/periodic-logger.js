@@ -38,7 +38,7 @@ if (process.argv[2] == "--add" && process.argv.length >= 4) {
 			console.log(error.toString());
 	});
 } else if (process.argv[2] == "--run") {
-	service.run (logStream, function () {
+	service.run (function () {
 		service.stop (0);
 	});
 
