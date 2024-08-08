@@ -1,13 +1,13 @@
 {
   "name": "os-service",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Run Node.JS programs as native Operating System Services.",
   "main": "index.js",
   "directories": {
     "example": "example"
   },
   "dependencies": {
-    "nan": "2.14.x"
+    "nan": "2.20.x"
   },
   "contributors": [
     {

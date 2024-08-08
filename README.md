@@ -391,6 +391,10 @@ Example programs are included under the modules `example` directory.
 
  * Support Node.js 12.x
 
+## Version 2.3.0 - 08/01/2024
+
+ * Support Node.js 20.x
+
 # License
 
 Copyright (c) 2018 NoSpaceships Ltd <hello@nospaceships.com>
