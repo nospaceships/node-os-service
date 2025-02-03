@@ -87,7 +87,7 @@ VOID WINAPI run (DWORD argc, LPTSTR *argv) {
 }
 
 DWORD __stdcall run_thread (LPVOID param) {
-	SERVICE_TABLE_ENTRY table[] = {{"", run}, {0, }};
+	SERVICE_TABLE_ENTRY table[] = {{const_cast<LPSTR>(""), run}, {0, }};
 
 	if (StartServiceCtrlDispatcher (table)) {
 		while (1) {
